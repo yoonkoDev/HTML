@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>CSS 선택자 데모</title>
+  <style>
+    /* 1. 태그 선택자 */
+    p {
+      color: navy;
+    }
+
+    /* 2. 클래스 선택자 */
+    .note {
+      background: #fffae6;
+      border-left: 4px solid orange;
+      padding: 4px;
+    }
+
+    /* 3. 아이디 선택자 */
+    #header {
+      background: #333;
+      color: white;
+      padding: 6px;
+    }
+
+    /* 4. 그룹 선택자 */
+    h1, h2, h3 {
+      font-family: "맑은 고딕", sans-serif;
+    }
+
+    /* 5. 자손 선택자 */
+    div p {
+      color: green;
+    }
+
+    /* 6. 자식 선택자 */
+    ul > li {
+      list-style-type: square;
+    }
+
+    /* 7. 형제 선택자 */
+    h2 + p {
+      color: red;
+    }
+    h2 ~ p {
+      font-style: italic;
+    }
+
+    /* 8. 속성 선택자 */
+    a[target="_blank"] {
+      color: orange;
+    }
+
+    /* 9. 가상 클래스 */
+    a:hover {
+      text-decoration: underline;
+      color: crimson;
+    }
+    p:first-child {
+      font-weight: bold;
+    }
+
+    /* 10. 가상 요소 */
+    p::before {
+      content: "👉 ";
+    }
+    p::after {
+      content: " 🔔";
+    }
+
+    /* 11. 복합 선택자 */
+    nav ul > li:first-child a {
+      color: crimson;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="header">#header 아이디 선택자 예시</div>
+
+  <h1>CSS 선택자 데모</h1>
+  <h2>그룹/형제 선택자 예시</h2>
+  <p>이 문장은 h2 바로 뒤 → 빨간색</p>
+  <p>이 문장은 h2 뒤의 모든 p → 기울임</p>
+
+  <div>
+    <p>div 안에 있는 p → 초록색</p>
+  </div>
+  <p>div 밖의 p → 네이비색</p>
+
+  <p class="note">.note 클래스 선택자 예시</p>
+
+  <ul>
+    <li>직접 자식 li → 네모 불릿</li>
+    <li>두 번째 li</li>
+  </ul>
+
+  <p><a href="https://www.example.com" target="_blank">외부링크 (속성 선택자, hover)</a></p>
+
+  <nav>
+    <ul>
+      <li><a href="#">첫번째 링크</a></li>
+      <li><a href="#">두번째 링크</a></li>
+    </ul>
+  </nav>
+
+</body>
+</html>
