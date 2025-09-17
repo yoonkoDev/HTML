@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>기본태그 정답 예시</title>
+  <style>
+    :root{--bg:#f8fafc;--fg:#111827;--card:#ffffff;--muted:#6b7280;--accent:#2563eb;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;color:var(--fg);background:var(--bg);}
+    .wrap{max-width:980px;margin:0 auto;padding:24px;}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+    header img{width:88px;height:88px;object-fit:cover;border-radius:50%;border:3px solid var(--accent);}
+    header h1{margin:0;}
+    header p{margin:4px 0 0;color:var(--muted);}
+    .card{background:var(--card);border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px;}
+    table{width:100%;border-collapse:collapse;margin-top:8px;}
+    th,td{border:1px solid #e5e7eb;padding:8px 10px;text-align:left;}
+    th{background:#f1f5f9;}
+    .btn{display:inline-block;margin-top:8px;border:1px solid var(--accent);padding:10px 14px;border-radius:8px;color:var(--accent);text-decoration:none;}
+    .btn:hover{background:var(--accent);color:#fff;}
+    footer{color:var(--muted);font-size:0.9rem;margin-top:24px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="https://via.placeholder.com/160.png?text=Me" alt="프로필 이미지" />
+      <div>
+        <h1>홍길동</h1>
+        <p>웹 입문자 · 꾸준히 배우는 사람</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>소개</h2>
+        <p>안녕하세요! 저는 <strong>웹 입문자</strong>입니다. 요즘은 <em>HTML</em>과 <em>CSS</em> 공부를 즐기며,
+          작은 결과물을 꾸준히 만들고 있습니다. 아래는 제가 좋아하는 것들이에요. <small>(2025 업데이트)</small></p>
+        <p>중요 포인트는 <mark>접근성</mark>과 <mark>가독성</mark>을 신경 쓰는 것입니다. x<sup>2</sup>와 H<sub>2</sub>O처럼
+          <code>sup/sub</code>도 상황에 맞게 사용합니다.</p>
+        <a class="btn" href="https://developer.mozilla.org/ko/" target="_blank" rel="noopener">MDN 바로가기</a>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>좋아하는 것 Top 3</h2>
+          <ul>
+            <li>커피 원두 탐험</li>
+            <li>주말 사진 산책</li>
+            <li>간단한 요리</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>이번 주 일정 (표)</h2>
+          <table>
+            <tr><th>요일</th><th>계획</th></tr>
+            <tr><td>월</td><td>JS 문법 복습</td></tr>
+            <tr><td>수</td><td>폼과 이벤트 실습</td></tr>
+            <tr><td>금</td><td>미니 프로젝트 정리</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h2>문의하기 (폼)</h2>
+          <form>
+            <label for="name">이름</label><br />
+            <input id="name" type="text" placeholder="홍길동" /><br /><br />
+            <label for="email">이메일</label><br />
+            <input id="email" type="email" placeholder="me@example.com" /><br /><br />
+            <label for="msg">메시지</label><br />
+            <textarea id="msg" rows="4" cols="28" placeholder="안녕하세요!"></textarea><br /><br />
+            <button type="submit">보내기</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2025 HTML Basic Practice · 이 페이지는 기본 태그만으로 제작되었습니다.</p>
+    </footer>
+  </div>
+</body>
+</html>
