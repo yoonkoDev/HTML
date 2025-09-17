@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Grid & Flexbox Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;       /* slate-900 */
+      --panel: #111827;    /* gray-900 */
+      --card: #1f2937;     /* gray-800 */
+      --muted: #94a3b8;    /* slate-400 */
+      --fg: #e5e7eb;       /* gray-200 */
+      --accent: #60a5fa;   /* blue-400 */
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
+      color: var(--fg);
+      background: linear-gradient(180deg, var(--bg), #0b1224 60%);
+    }
+    h1, h2 { margin: 0 0 .5rem; font-weight: 700; }
+    p { margin: .25rem 0 .75rem; color: var(--muted); }
+
+    /* 공통 래퍼 */
+    .wrapper {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid #1e293b66;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px #0006;
+      padding: 16px;
+    }
+
+    /* =========================
+       FLEXBOX DEMO
+       ========================= */
+    .flex-demo .bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      background: #0b1224;
+      border-radius: 10px;
+      align-items: center;            /* 교차축(세로) 정렬 */
+      justify-content: space-between; /* 주축(가로) 정렬 */
+    }
+    .logo { font-weight: 800; color: var(--accent); }
+    .nav {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .nav a {
+      color: var(--fg);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .nav a:hover { background: #1f2937; }
+
+    /* 카드 행: flex-wrap으로 줄바꿈 */
+    .flex-cards {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .flex-cards .card {
+      flex: 1 1 220px;   /* grow=1, shrink=1, basis=220px */
+      min-width: 200px;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid #1f2937;
+    }
+
+    /* =========================
+       GRID DEMO
+       ========================= */
+    .grid-demo .grid {
+      display: grid;
+      gap: 12px;
+      /* 컬럼 3개: 좌측 넓게, 사이드바 좁게 */
+      grid-template-columns: 2fr 1fr;
+      grid-template-areas:
+        "header  header"
+        "main    aside"
+        "footer  footer";
+    }
+    .grid-item {
+      background: var(--card);
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .grid-header { grid-area: header; }
+    .grid-main   { grid-area: main;   min-height: 160px; }
+    .grid-aside  { grid-area: aside;  }
+    .grid-footer { grid-area: footer; }
+
+    /* 반응형: 좁은 화면에선 1컬럼으로 재배치 */
+    @media (max-width: 720px) {
+      .grid-demo .grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "header"
+          "main"
+          "aside"
+          "footer";
+      }
+    }
+
+    /* 작은 유틸 */
+    .badge {
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      background:#0ea5e9;
+      color:white;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.3px;
+    }
+    code {
+      background: #0b1224;
+      border: 1px solid #1f2937;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: #d1e9ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <!-- FLEXBOX SECTION -->
+    <section class="panel flex-demo">
+      <h1>Flexbox 데모 <span class="badge">1D Layout</span></h1>
+      <p>한 축(가로/세로) 정렬에 강함. 메뉴바, 버튼 줄, 카드 행 등에 적합합니다.</p>
+
+      <!-- 상단 바: space-between으로 좌/우 정렬 -->
+      <div class="bar">
+        <div class="logo">MySite</div>
+        <nav class="nav">
+          <a href="#">Home</a>
+          <a href="#">Docs</a>
+          <a href="#">Pricing</a>
+          <a href="#">Login</a>
+        </nav>
+      </div>
+
+      <!-- 카드 그리드처럼 보이지만 flex-wrap으로 감음 -->
+      <div class="flex-cards">
+        <div class="card">
+          <h3>카드 A</h3>
+          <p>flex: <code>1 1 220px</code> — 화면에 맞춰 유연하게 폭이 변합니다.</p>
+        </div>
+        <div class="card">
+          <h3>카드 B</h3>
+          <p><code>gap</code>으로 카드 간격을 간단히 조절합니다.</p>
+        </div>
+        <div class="card">
+          <h3>카드 C</h3>
+          <p><code>justify-content</code>, <code>align-items</code>로 정렬을 제어합니다.</p>
+        </div>
+        <div class="card">
+          <h3>카드 D</h3>
+          <p>작아지면 자동 줄바꿈(<code>flex-wrap</code>)이 됩니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- GRID SECTION -->
+    <section class="panel grid-demo">
+      <h2>Grid 데모 <span class="badge">2D Layout</span></h2>
+      <p>행과 열을 동시에 설계. 페이지 레이아웃, 대시보드, 포스터형 구성에 적합합니다.</p>
+
+      <div class="grid">
+        <header class="grid-item grid-header">
+          <strong>Header</strong>
+          <p>grid-areas로 영역을 이름으로 배치합니다.</p>
+        </header>
+
+        <main class="grid-item grid-main">
+          <strong>Main</strong>
+          <p><code>grid-template-columns: 2fr 1fr</code> — 메인 2, 사이드 1 비율.</p>
+          <p><code>gap</code>으로 행/열 간격을 한 번에 설정합니다.</p>
+        </main>
+
+        <aside class="grid-item grid-aside">
+          <strong>Aside</strong>
+          <p>사이드바 영역입니다. 필요 시 아이템에 <code>grid-column/row</code>로
+             특정 칸을 가로지르게 할 수도 있어요.</p>
+        </aside>
+
+        <footer class="grid-item grid-footer">
+          <strong>Footer</strong>
+          <p>좁은 화면에선 미디어쿼리로 1열 스택 형태로 자동 재배치.</p>
+        </footer>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
