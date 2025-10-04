@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>계산기 실습 (Solution)</title>
+</head>
+<body>
+  <h1>간단한 계산기</h1>
+  <input id="num1" type="number">
+  <input id="num2" type="number">
+  <button id="plusBtn">더하기</button>
+  <p id="result">여기에 결과가 표시됩니다.</p>
+
+  <script>
+    const n1 = document.getElementById("num1");
+    const n2 = document.getElementById("num2");
+    const result = document.getElementById("result");
+    document.getElementById("plusBtn").addEventListener("click", () => {
+      result.textContent = Number(n1.value) + Number(n2.value);
+    });
+  </script>
+</body>
+</html>

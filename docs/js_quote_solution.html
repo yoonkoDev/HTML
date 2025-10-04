@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>랜덤 명언 실습 (Solution)</title>
+</head>
+<body>
+  <h1>랜덤 명언 출력기</h1>
+  <button id="quoteBtn">명언 보기</button>
+  <p id="quote">여기에 명언이 표시됩니다.</p>
+
+  <script>
+    const quotes = [
+      "오늘도 최선을 다하자!",
+      "작은 걸음이 큰 변화를 만든다.",
+      "실패는 성공의 발판이다."
+    ];
+    const btn = document.getElementById("quoteBtn");
+    const quote = document.getElementById("quote");
+
+    btn.addEventListener("click", () => {
+      const random = Math.floor(Math.random() * quotes.length);
+      quote.textContent = quotes[random];
+    });
+  </script>
+</body>
+</html>

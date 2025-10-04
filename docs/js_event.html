@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>DOM 이벤트 통합 예제</title>
+  <style>
+    #hoverArea {
+      width: 200px;
+      height: 40px;
+      background: #eee;
+      line-height: 40px;
+      text-align: center;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #messages {
+      margin-top: 20px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      min-height: 40px;
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h2>자바스크립트 DOM 이벤트 실습</h2>
+  
+  <button id="btn">클릭해보세요!</button>
+  
+  <div id="hoverArea">마우스를 올려보세요</div>
+  
+  <form id="loginForm" style="margin-bottom:16px;">
+    <input type="text" id="idInput" placeholder="ID">
+    <button type="submit">로그인</button>
+  </form>
+  
+  <input type="text" id="changeInput" placeholder="값을 입력 후 엔터">
+  
+  <input type="text" id="keydownInput" placeholder="키를 눌러보세요" style="margin-left:16px;">
+  
+  <div id="messages"></div>
+  
+  <script>
+    const messages = document.getElementById("messages");
+
+    // 클릭 이벤트
+    document.getElementById("btn").addEventListener("click", function() {
+      messages.innerText = "버튼이 클릭되었습니다!";
+    });
+
+    // 마우스오버/아웃 이벤트
+    const hoverArea = document.getElementById("hoverArea");
+    hoverArea.addEventListener("mouseover", function() {
+      hoverArea.style.background = "#cceeff";
+      messages.innerText = "마우스가 영역에 진입했습니다!";
+    });
+    hoverArea.addEventListener("mouseout", function() {
+      hoverArea.style.background = "#eee";
+      messages.innerText = "마우스가 영역을 벗어났습니다!";
+    });
+
+    // 폼 제출 이벤트
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      messages.innerText = "폼이 제출되었습니다! 입력된 ID: " + document.getElementById("idInput").value;
+    });
+
+    // 입력값 변경 이벤트
+    document.getElementById("changeInput").addEventListener("change", function(e) {
+      messages.innerText = "입력값이 변경되었습니다: " + e.target.value;
+    });
+
+    // 키다운 이벤트
+    document.getElementById("keydownInput").addEventListener("keydown", function(e) {
+      messages.innerText = "눌린 키: " + e.key;
+    });
+  </script>
+</body>
+</html>

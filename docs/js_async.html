@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>자바스크립트 비동기 처리 예제</title>
+</head>
+<body>
+  <h2>비동기 처리 실습</h2>
+  <button id="timeoutBtn">setTimeout 예제</button>
+  <button id="fetchBtn">fetch 예제</button>
+  <button id="asyncBtn">async/await 예제</button>
+  <div id="result" style="margin-top:20px;"></div>
+
+  <script>
+    const result = document.getElementById('result');
+
+    // 1. setTimeout 예제 (콜백 함수)
+    document.getElementById('timeoutBtn').addEventListener('click', function() {
+      result.innerText = '5초 후 실행됩니다...';
+      // setTimeout은 일정 시간이 지나면 실행되는 타이머 함수, UI가 멈추지 않고,
+      //  대기하는 동안 다른 코드가 실행
+      setTimeout(function() {
+        result.innerText = 'setTimeout 완료! (비동기)';
+      }, 5000);
+    });
+
+    // 2. fetch 예제 (Promise)
+    document.getElementById('fetchBtn').addEventListener('click', function() {
+      result.innerText = '데이터 요청 중...';
+      // fetch 함수는 비동기 네트워크 요청. 실행 즉시 서버 통신을 시작하지만 바로 다음 줄로 넘어간다.
+      // 결과가 돌아오면 .then() 콜백이 비동기적으로 실행된다.
+      // fetch는 “Promise 객체”를 반환. 비동기 처리를 위해 .then/.catch 패턴을 사용한다
+      fetch('https://jsonplaceholder.typicode.com/todos/1')
+        .then(response => response.json())
+        .then(data => {
+          result.innerText = '데이터 받아옴: ' + JSON.stringify(data);
+        })
+        .catch(error => {
+          result.innerText = '에러 발생: ' + error;
+        });
+    });
+
+    // 3. async/await 예제
+    document.getElementById('asyncBtn').addEventListener('click', async function() {
+      result.innerText = 'async/await 데이터 요청 중...';
+      // async/await는 Promise 기반 비동기 코드를 마치 동기 코드처럼 작성.
+      // async 함수 내에서 await 키워드를 통해 “비동기 작업이 끝날 때까지” 단 한 줄씩 코드가 처리
+      // 가독성이 높아 이해하기 쉽다. await을 만나면 해당 promise가 해결될 때까지 대기.
+      // try/catch 구문과 함께 쓰면 에러 처리도 직관적이다.
+      try {
+        const res = await fetch('https://jsonplaceholder.typicode.com/todos/2');
+        const data = await res.json();
+        result.innerText = 'async/await 데이터: ' + JSON.stringify(data);
+      } catch (err) {
+        result.innerText = '에러 발생: ' + err;
+      }
+    });
+  </script>
+</body>
+</html>

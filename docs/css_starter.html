@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>내가 좋아하는 음식 소개</title>
+  <link rel="stylesheet" href="css_style.css" />
+  <!--
+    ✅ 실습 목표
+    1) 카드 컴포넌트(.card) 스타일 적용
+    2) 갤러리(.gallery)로 이미지 그리드 배치
+    3) 반응형(@media)로 모바일에서도 보기 좋게
+  -->
+</head>
+<body>
+  <header class="site-header">
+    <h1>내가 좋아하는 음식 소개 🍽️</h1>
+    <p class="lead">여러분이 좋아하는 음식을 카드로 예쁘게 소개해 보세요!</p>
+  </header>
+
+  <main class="container">
+    <section class="intro card">
+      <h2>소개</h2>
+      <p>이 페이지는 CSS 연습을 위한 스타터입니다. 아래 TODO를 참고해서 스타일을 완성해 보세요.</p>
+      <ul>
+        <li>색상, 글꼴, 여백, 박스모델 연습</li>
+        <li>Flexbox/Grid를 응용한 카드/갤러리 배치</li>
+        <li>@media로 반응형 처리</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>음식 카드</h2>
+      <div class="cards">
+        <!-- TODO: 카드 3~6개 정도 복제해서 사용하세요 -->
+        <article class="card">
+          <img src="https://via.placeholder.com/480x300?text=Food+1" alt="음식 1 이미지" />
+          <div class="card-body">
+            <h3>음식 이름 1</h3>
+            <p class="muted">간단 설명을 적어 보세요.</p>
+            <a class="btn" href="#">레시피 보기</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <img src="https://via.placeholder.com/480x300?text=Food+2" alt="음식 2 이미지" />
+          <div class="card-body">
+            <h3>음식 이름 2</h3>
+            <p class="muted">간단 설명을 적어 보세요.</p>
+            <a class="btn" href="#">레시피 보기</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <img src="https://via.placeholder.com/480x300?text=Food+3" alt="음식 3 이미지" />
+          <div class="card-body">
+            <h3>음식 이름 3</h3>
+            <p class="muted">간단 설명을 적어 보세요.</p>
+            <a class="btn" href="#">레시피 보기</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>이미지 갤러리</h2>
+      <div class="gallery">
+        <!-- TODO: 이미지를 더 추가해 보세요 -->
+        <img src="https://via.placeholder.com/420x280?text=Gallery+1" alt="갤러리 이미지 1" />
+        <img src="https://via.placeholder.com/420x280?text=Gallery+2" alt="갤러리 이미지 2" />
+        <img src="https://via.placeholder.com/420x280?text=Gallery+3" alt="갤러리 이미지 3" />
+        <img src="https://via.placeholder.com/420x280?text=Gallery+4" alt="갤러리 이미지 4" />
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2025 My Food · CSS 연습용 스타터</p>
+  </footer>
+</body>
+</html>
