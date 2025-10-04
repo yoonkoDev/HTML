@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>로컬 일기장 (캘린더 + 첨부 + 로컬 저장)</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f172a; --ink:#e5e7eb; --muted:#9aa6b2; --accent:#22c55e; --warn:#ef4444; --line:#192132;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,"Apple SD Gothic Neo","Malgun Gothic",sans-serif; background:var(--bg); color:var(--ink)}
+  header{position:sticky; top:0; z-index:3; background:rgba(11,18,32,.8); backdrop-filter: blur(6px); border-bottom:1px solid var(--line);}
+  header .bar{max-width:1100px; margin:0 auto; padding:12px 16px; display:flex; gap:12px; align-items:center; justify-content:space-between}
+  h1{margin:0; font-size:18px}
+  main{max-width:1100px; margin:20px auto 40px; padding:0 16px; display:grid; grid-template-columns: 1.1fr .9fr; gap:16px}
+  @media (max-width: 980px){ main{grid-template-columns: 1fr;} }
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .card h2{margin:0; padding:12px 14px; border-bottom:1px solid var(--line); font-size:16px}
+  .card .body{padding:14px}
+
+  .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  button{background:#152034; border:1px solid #23324b; color:var(--ink); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700}
+  button:hover{background:#1a2942}
+  .primary{background:#0b7a3a; border-color:#0b7a3a}
+  .primary:hover{background:#0a6a33}
+  .danger{background:#7a0b27; border-color:#7a0b27}
+  input,textarea,select{background:#0b1220; border:1px solid #23324b; color:var(--ink); padding:8px 10px; border-radius:10px}
+  textarea{width:100%; min-height:180px; resize:vertical}
+  .muted{color:var(--muted)}
+
+  /* Calendar */
+  .cal-head{display:flex; justify-content:space-between; align-items:center; gap:8px}
+  .cal-grid{margin-top:10px; display:grid; grid-template-columns: repeat(7, 1fr); gap:6px}
+  .dow{font-size:12px; color:var(--muted); text-align:center; padding:6px 0}
+  .day{position:relative; border:1px solid var(--line); border-radius:10px; min-height:80px; padding:8px; cursor:pointer; background:#0b1220}
+  .day:hover{outline:2px solid #2b3f63}
+  .day .dnum{font-weight:800; font-size:14px}
+  .day .mark{position:absolute; right:8px; top:6px; color:var(--accent); font-weight:900}
+  .day.today{background:#0f213e}
+  .day.out{opacity:.45}
+  .selected{outline:2px solid var(--accent)}
+
+  .file-list{display:flex; flex-direction:column; gap:6px; margin-top:6px}
+  .file-item{display:flex; justify-content:space-between; gap:8px; align-items:center; background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:6px 8px; font-size:13px}
+  .pill{display:inline-block; padding:2px 8px; border:1px solid #334155; border-radius:999px; font-size:12px; color:#cbd5e1}
+  .footer{font-size:12px; color:var(--muted); margin-top:8px}
+</style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div>
+        <h1>로컬 일기장 · 캘린더 + 첨부 (HTML/JS/CSS만)</h1>
+        <div class="muted" style="font-size:12px">IndexedDB에 저장 · 선택 시 File System Access API로 파일 저장(선택)</div>
+      </div>
+      <div class="row">
+        <button id="btnPrev">◀ 이전달</button>
+        <div id="ymLabel" class="pill">0000-00</div>
+        <button id="btnNext">다음달 ▶</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>달력</h2>
+      <div class="body">
+        <div class="cal-head">
+          <div class="muted">오늘: <span id="todayLabel"></span></div>
+          <div class="row">
+            <button id="btnToday">오늘로</button>
+            <button id="btnRefresh">표시 새로고침</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="dowRow"></div>
+        <div class="cal-grid" id="calGrid" aria-live="polite"></div>
+        <div class="footer">별표(<span style="color:var(--accent)">*</span>)가 있는 날은 일기가 저장되어 있습니다.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>일기 편집</h2>
+      <div class="body">
+        <div class="row" style="margin-bottom:8px">
+          <label class="pill">선택 날짜</label>
+          <strong id="selectedDate">-</strong>
+          <span class="muted" id="storeMode"></span>
+        </div>
+
+        <textarea id="diaryText" placeholder="오늘의 기록을 써 보세요..."></textarea>
+
+        <div class="row" style="margin-top:10px">
+          <input id="fileInput" type="file" multiple />
+          <button id="btnAttach">첨부 추가</button>
+          <button id="btnClearFiles">첨부 초기화</button>
+        </div>
+
+        <div id="fileList" class="file-list"></div>
+
+        <div class="row" style="margin-top:12px">
+          <button class="primary" id="btnSave">저장</button>
+          <button class="danger" id="btnDelete">삭제</button>
+          <button id="btnExport">내보내기(.json/파일)</button>
+          <button id="btnPickDir">(선택) 저장 폴더 지정</button>
+        </div>
+
+        <div class="footer">
+          데이터는 기본적으로 브라우저 <strong>IndexedDB</strong>에 저장됩니다. 
+          크롬/엣지 등 지원 브라우저에서는 <strong>File System Access API</strong>로 선택한 폴더에 항목을 개별 파일로 내보낼 수 있습니다.
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+/**
+ * 로컬 일기장 — 순수 HTML/CSS/JS
+ * - 데이터 저장: IndexedDB (entries: {date, text, files:[{name, type, blob}]})
+ * - 파일 내보내기: Blob 다운로드 또는 File System Access API(옵션)
+ * - 캘린더: 해당 월의 일수 렌더링, 저장된 날에 별표 표시
+ */
+
+// ====== IndexedDB 헬퍼 ======
+const DB_NAME = 'diaryDB';
+const DB_VER = 1;
+const STORE = 'entries';
+
+function idbOpen(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = (e)=>{
+      const db = req.result;
+      if(!db.objectStoreNames.contains(STORE)){
+        const os = db.createObjectStore(STORE, { keyPath: 'date' });
+        os.createIndex('by_month', 'month'); // YYYY-MM
+      }
+    };
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = ()=>reject(req.error);
+  });
+}
+
+async function idbPut(entry){
+  const db = await idbOpen();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(STORE,'readwrite');
+    tx.oncomplete = ()=>resolve();
+    tx.onerror = ()=>reject(tx.error);
+    const store = tx.objectStore(STORE);
+    store.put(entry);
+  });
+}
+
+async function idbGet(dateStr){
+  const db = await idbOpen();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(STORE,'readonly');
+    const store = tx.objectStore(STORE);
+    const req = store.get(dateStr);
+    req.onsuccess = ()=>resolve(req.result || null);
+    req.onerror = ()=>reject(req.error);
+  });
+}
+
+async function idbDel(dateStr){
+  const db = await idbOpen();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(STORE,'readwrite');
+    const store = tx.objectStore(STORE);
+    const req = store.delete(dateStr);
+    req.onsuccess = ()=>resolve();
+    req.onerror = ()=>reject(req.error);
+  });
+}
+
+async function idbDaysWithEntries(month){ // month: 'YYYY-MM'
+  const db = await idbOpen();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(STORE,'readonly');
+    const store = tx.objectStore(STORE);
+    const idx = store.index('by_month');
+    const days = new Set();
+    const range = IDBKeyRange.only(month);
+    idx.openCursor(range).onsuccess = (e)=>{
+      const cur = e.target.result;
+      if(cur){
+        const d = cur.value.date.split('-')[2];
+        days.add(parseInt(d,10));
+        cur.continue();
+      } else {
+        resolve(days);
+      }
+    };
+    tx.onerror = ()=>reject(tx.error);
+  });
+}
+
+// ====== 캘린더 상태 ======
+let viewYear, viewMonth; // 숫자 (예: 2025, 10)
+let selectedDateStr = null; // 'YYYY-MM-DD'
+let pickedDirHandle = null; // File System Access API directory handle
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function toDateStr(y,m,d){ return `${y}-${pad(m)}-${pad(d)}`; }
+function ymKey(y,m){ return `${y}-${pad(m)}`; }
+
+function firstDayOfMonth(y,m){ return new Date(y, m-1, 1); }
+function daysInMonth(y,m){ return new Date(y, m, 0).getDate(); }
+
+function isToday(y,m,d){
+  const t = new Date();
+  return t.getFullYear()===y && (t.getMonth()+1)===m && t.getDate()===d;
+}
+
+// ====== 캘린더 렌더링 ======
+const calGrid = document.getElementById('calGrid');
+const dowRow = document.getElementById('dowRow');
+const ymLabel = document.getElementById('ymLabel');
+const todayLabel = document.getElementById('todayLabel');
+const selectedDateEl = document.getElementById('selectedDate');
+const storeModeEl = document.getElementById('storeMode');
+
+const DOW = ['일','월','화','수','목','금','토'];
+function renderDOW(){
+  dowRow.innerHTML = DOW.map(d=>`<div class="dow">${d}</div>`).join('');
+}
+
+async function renderCalendar(){
+  ymLabel.textContent = ymKey(viewYear, viewMonth);
+  const monthDays = daysInMonth(viewYear, viewMonth);
+  const first = firstDayOfMonth(viewYear, viewMonth);
+  const offset = first.getDay(); // 0~6
+
+  // 앞뒤 채우기 위한 이전/다음 달 계산
+  const prevMonth = viewMonth===1?12:viewMonth-1;
+  const prevYear = viewMonth===1?viewYear-1:viewYear;
+  const prevDays = daysInMonth(prevYear, prevMonth);
+
+  // 이 달에 기록이 있는 날들
+  const marked = await idbDaysWithEntries(ymKey(viewYear, viewMonth));
+
+  const cells = [];
+  // 앞쪽 비는 칸 (이전 달)
+  for(let i=offset-1;i>=0;i--){
+    const d = prevDays - i;
+    cells.push(dayCell(prevYear, prevMonth, d, true, false));
+  }
+  // 이번 달
+  for(let d=1; d<=monthDays; d++){
+    const has = marked.has(d);
+    cells.push(dayCell(viewYear, viewMonth, d, false, has));
+  }
+  // 뒤쪽 채우기 (6행 맞춤)
+  const total = cells.length;
+  const toAdd = total%7===0?0:7-(total%7);
+  const nextMonth = viewMonth===12?1:viewMonth+1;
+  const nextYear = viewMonth===12?viewYear+1:viewYear;
+  for(let d=1; d<=toAdd; d++){
+    cells.push(dayCell(nextYear, nextMonth, d, true, false));
+  }
+  calGrid.innerHTML = cells.join('');
+  // 선택 강조
+  if(selectedDateStr){
+    const box = calGrid.querySelector(`[data-date="${selectedDateStr}"]`);
+    if(box) box.classList.add('selected');
+  }
+}
+
+function dayCell(y,m,d, out, has){
+  const isT = isToday(y,m,d);
+  const dateStr = toDateStr(y,m,d);
+  return `<div class="day${out?' out':''}${isT?' today':''}" data-date="${dateStr}" role="button" tabindex="0" aria-label="${dateStr}">
+    <div class="dnum">${d}</div>
+    ${has?'<div class="mark">*</div>':''}
+  </div>`;
+}
+
+// ====== 선택/로드/세이브 ======
+const diaryText = document.getElementById('diaryText');
+const fileInput = document.getElementById('fileInput');
+const fileList = document.getElementById('fileList');
+
+let attachBuffer = []; // {name,type,blob}
+
+function resetEditor(dateStr){
+  selectedDateStr = dateStr;
+  selectedDateEl.textContent = dateStr || '-';
+  diaryText.value = '';
+  attachBuffer = [];
+  renderFiles();
+}
+
+function renderFiles(){
+  if(!attachBuffer.length){ fileList.innerHTML = '<div class="muted">첨부 없음</div>'; return; }
+  fileList.innerHTML = attachBuffer.map((f,i)=>`
+    <div class="file-item">
+      <div>
+        <strong>${escapeHtml(f.name)}</strong>
+        <span class="muted">(${escapeHtml(f.type||'')}, ${fmtSize(f.blob.size)})</span>
+      </div>
+      <button data-remove="${i}">제거</button>
+    </div>
+  `).join('');
+}
+
+function fmtSize(n){
+  if(n<1024) return n+' B';
+  if(n<1024*1024) return (n/1024).toFixed(1)+' KB';
+  return (n/1024/1024).toFixed(1)+' MB';
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+async function selectDate(dateStr){
+  resetEditor(dateStr);
+  const entry = await idbGet(dateStr);
+  if(entry){
+    diaryText.value = entry.text || '';
+    // Blob 재생성
+    attachBuffer = (entry.files||[]).map(x=>({name:x.name,type:x.type, blob: b64ToBlob(x.data, x.type)}));
+    renderFiles();
+  }
+  // 선택 표시 갱신
+  calGrid.querySelectorAll('.day').forEach(el=>el.classList.remove('selected'));
+  const box = calGrid.querySelector(`[data-date="${dateStr}"]`);
+  if(box) box.classList.add('selected');
+}
+
+function b64ToBlob(b64, type){
+  const bin = atob(b64);
+  const len = bin.length;
+  const buf = new Uint8Array(len);
+  for(let i=0;i<len;i++) buf[i] = bin.charCodeAt(i);
+  return new Blob([buf], {type});
+}
+
+function blobToB64(blob){
+  return new Promise((resolve)=>{
+    const fr = new FileReader();
+    fr.onload = ()=>{
+      const url = fr.result; // data:*/*;base64,....
+      resolve(url.split(',')[1]);
+    };
+    fr.readAsDataURL(blob);
+  });
+}
+
+async function saveEntry(){
+  if(!selectedDateStr){ alert('달력에서 날짜를 먼저 선택하세요.'); return; }
+  const month = selectedDateStr.slice(0,7);
+  const files = [];
+  for(const f of attachBuffer){
+    files.push({ name: f.name, type: f.type, data: await blobToB64(f.blob) });
+  }
+  const entry = { date: selectedDateStr, month, text: diaryText.value, files };
+  await idbPut(entry);
+  alert('저장했습니다.');
+  renderCalendar();
+}
+
+async function deleteEntry(){
+  if(!selectedDateStr){ alert('선택된 날짜가 없습니다.'); return; }
+  if(!confirm('이 날짜의 일기를 삭제할까요?')) return;
+  await idbDel(selectedDateStr);
+  resetEditor(selectedDateStr);
+  renderCalendar();
+}
+
+function addAttachments(){
+  const files = [...fileInput.files];
+  files.forEach(f=>{
+    attachBuffer.push({ name:f.name, type:f.type, blob:f });
+  });
+  fileInput.value = '';
+  renderFiles();
+}
+
+function clearAttachments(){ attachBuffer = []; renderFiles(); }
+
+fileList.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-remove]');
+  if(btn){
+    const idx = parseInt(btn.getAttribute('data-remove'),10);
+    attachBuffer.splice(idx,1);
+    renderFiles();
+  }
+});
+
+// ====== 내보내기 (다운로드 or 디렉터리 저장) ======
+function downloadFile(name, blob){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+}
+
+async function exportEntry(){
+  if(!selectedDateStr){ alert('선택된 날짜가 없습니다.'); return; }
+  const entry = await idbGet(selectedDateStr);
+  if(!entry){ alert('저장된 일기가 없습니다.'); return; }
+
+  // JSON 내보내기
+  const jsonBlob = new Blob([JSON.stringify(entry,null,2)], {type:'application/json'});
+
+  if (pickedDirHandle && 'showDirectoryPicker' in window){
+    try{
+      const dir = pickedDirHandle;
+      // 날짜 폴더
+      const sub = await dir.getDirectoryHandle(selectedDateStr, {create:true});
+      // write json
+      await writeFileToDir(sub, `diary-${selectedDateStr}.json`, jsonBlob);
+      // files
+      for(const f of entry.files||[]){
+        const blob = b64ToBlob(f.data, f.type);
+        await writeFileToDir(sub, f.name, blob);
+      }
+      alert('선택한 폴더에 내보냈습니다.');
+      return;
+    } catch(err){
+      console.error(err);
+      alert('폴더 저장 중 오류가 발생했습니다. 일반 다운로드로 진행합니다.');
+    }
+  }
+
+  // fallback: 브라우저 다운로드
+  downloadFile(`diary-${selectedDateStr}.json`, jsonBlob);
+  for(const f of entry.files||[]){
+    const blob = b64ToBlob(f.data, f.type);
+    downloadFile(f.name, blob);
+  }
+}
+
+async function writeFileToDir(dirHandle, fileName, blob){
+  const fh = await dirHandle.getFileHandle(fileName, {create:true});
+  const ws = await fh.createWritable();
+  await ws.write(blob);
+  await ws.close();
+}
+
+async function pickDirectory(){
+  if(!('showDirectoryPicker' in window)){
+    alert('이 기능은 Chromium 기반 브라우저에서 지원됩니다. (Chrome/Edge 등)');
+    return;
+  }
+  try{
+    pickedDirHandle = await window.showDirectoryPicker();
+    storeModeEl.textContent = `폴더 선택: ✔`; 
+  } catch(err){
+    console.warn('디렉터리 선택 취소/오류', err);
+  }
+}
+
+// ====== 초기화 & 이벤트 ======
+function init(){
+  const now = new Date();
+  viewYear = now.getFullYear();
+  viewMonth = now.getMonth()+1;
+  todayLabel.textContent = toDateStr(viewYear, viewMonth, now.getDate());
+  renderDOW();
+  renderCalendar();
+
+  document.getElementById('btnPrev').onclick = ()=>{ if(--viewMonth<1){viewMonth=12; viewYear--;} renderCalendar(); };
+  document.getElementById('btnNext').onclick = ()=>{ if(++viewMonth>12){viewMonth=1; viewYear++;} renderCalendar(); };
+  document.getElementById('btnToday').onclick = ()=>{
+    const t = new Date();
+    viewYear = t.getFullYear(); viewMonth = t.getMonth()+1; renderCalendar();
+  };
+  document.getElementById('btnRefresh').onclick = ()=>renderCalendar();
+
+  calGrid.addEventListener('click', (e)=>{
+    const cell = e.target.closest('.day');
+    if(cell){ selectDate(cell.getAttribute('data-date')); }
+  });
+  calGrid.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' || e.key===' '){
+      const cell = e.target.closest('.day');
+      if(cell){ e.preventDefault(); selectDate(cell.getAttribute('data-date')); }
+    }
+  });
+
+  document.getElementById('btnAttach').onclick = addAttachments;
+  document.getElementById('btnClearFiles').onclick = clearAttachments;
+  document.getElementById('btnSave').onclick = saveEntry;
+  document.getElementById('btnDelete').onclick = deleteEntry;
+  document.getElementById('btnExport').onclick = exportEntry;
+  document.getElementById('btnPickDir').onclick = pickDirectory;
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
