@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JavaScript 배열 연습 (DOM 출력)</title>
+  <style>
+    :root { --bg:#0f172a; --panel:#111827; --muted:#94a3b8; --fg:#e5e7eb; --accent:#22c55e; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Apple SD Gothic Neo, "Malgun Gothic", sans-serif; background:var(--bg); color:var(--fg); }
+    header { padding:18px 20px; border-bottom:1px solid #1f2937; background:#0b1220; position:sticky; top:0; z-index:1; }
+    header h1 { margin:0 0 4px; font-size:18px; }
+    header p { margin:0; color:var(--muted); font-size:13px; }
+    main { max-width:1100px; margin:24px auto; padding:0 16px 40px; display:grid; grid-template-columns: 1.15fr 0.85fr; gap:16px; }
+
+    .card { background:var(--panel); border:1px solid #1f2937; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+    .card h2 { margin:0; padding:14px 16px; border-bottom:1px solid #1f2937; font-size:16px; }
+    .card .body { padding:14px 16px; }
+
+    .toolbar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    button { background:#1f2937; border:1px solid #334155; color:#e5e7eb; padding:8px 10px; border-radius:10px; cursor:pointer; font-weight:600; }
+    button:hover { background:#243247; }
+    button.primary { background:#0b7a3a; border-color:#0b7a3a; }
+    button.primary:hover { background:#0a6a33; }
+    button.warn { background:#7a0b27; border-color:#7a0b27; }
+    input, select { background:#0b1220; border:1px solid #334155; color:#e5e7eb; padding:8px 10px; border-radius:10px; }
+
+    .grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .row label { color:var(--muted); font-size:13px; }
+
+    table { width:100%; border-collapse:collapse; overflow:hidden; border-radius:10px; }
+    th, td { border-bottom:1px solid #1f2937; padding:10px; text-align:left; }
+    th { background:#0b1220; color:#cbd5e1; font-weight:700; font-size:13px; }
+
+    .log { height:320px; overflow:auto; background:#0b1220; padding:12px; border-radius:10px; border:1px solid #1f2937; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:13px; }
+    .muted { color:var(--muted); }
+    .chip { background:#0b1220; border:1px solid #334155; padding:2px 8px; border-radius:999px; color:#cbd5e1; font-size:12px; }
+    .ok { color: var(--accent); font-weight:700; }
+    .footer { color:#94a3b8; font-size:12px; margin-top:10px; }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>JavaScript 배열 연습 (선언·참조·기본 메서드)</h1>
+    <p>버튼을 눌러 동작을 실행하고, 결과를 우측 로그/하단 표로 확인하세요.</p>
+  </header>
+
+  <main>
+    <!-- 좌: 실행 패널 -->
+    <section class="card" aria-labelledby="ops-title">
+      <h2 id="ops-title">배열 조작</h2>
+      <div class="body">
+        <div class="toolbar">
+          <button class="primary" id="resetBtn">초기화</button>
+          <span class="chip" id="lengthChip">length: 0</span>
+        </div>
+
+        <div class="grid" style="margin-bottom:12px;">
+          <div class="card">
+            <h2>선언 & 참조</h2>
+            <div class="body">
+              <div class="row">
+                <button onclick="declareArray()">배열 선언</button>
+                <button onclick="showReference()">인덱스 참조</button>
+                <button onclick="updateItem()">값 변경</button>
+              </div>
+              <p class="footer">기본 배열: <span class="muted">["apple", "banana", "cherry"]</span></p>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>추가/삭제 (끝·앞)</h2>
+            <div class="body">
+              <div class="row">
+                <input id="pushInput" placeholder="push 값" />
+                <button onclick="doPush()">push</button>
+                <button onclick="doPop()">pop</button>
+              </div>
+              <div class="row" style="margin-top:6px;">
+                <input id="unshiftInput" placeholder="unshift 값" />
+                <button onclick="doUnshift()">unshift</button>
+                <button onclick="doShift()">shift</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>부분 수정/복사</h2>
+            <div class="body">
+              <div class="row">
+                <label>splice(start, deleteCount, ...items)</label>
+                <input id="spStart" type="number" placeholder="start" style="width:100px;"/>
+                <input id="spDel" type="number" placeholder="deleteCount" style="width:120px;"/>
+                <input id="spItems" placeholder="items(콤마)" style="min-width:180px;"/>
+                <button onclick="doSplice()">splice</button>
+              </div>
+              <div class="row" style="margin-top:6px;">
+                <label>slice(start, end)</label>
+                <input id="slStart" type="number" placeholder="start" style="width:100px;"/>
+                <input id="slEnd" type="number" placeholder="end" style="width:100px;"/>
+                <button onclick="doSlice()">slice</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>검색/정렬/결합</h2>
+            <div class="body">
+              <div class="row">
+                <input id="searchInput" placeholder="찾을 값" />
+                <button onclick="doIndexOf()">indexOf</button>
+                <button onclick="doIncludes()">includes</button>
+              </div>
+              <div class="row" style="margin-top:6px;">
+                <button onclick="doSort()">sort()</button>
+                <button onclick="doReverse()">reverse()</button>
+                <button onclick="doJoin()">join(,)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>순회/변환</h2>
+            <div class="body">
+              <div class="row">
+                <button onclick="doForEach()">forEach()</button>
+                <button onclick="doMap()">map(x⇒x.toUpperCase())</button>
+                <button onclick="doFilter()">filter(x 포함)</button>
+                <button onclick="doReduce()">reduce(길이합)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>현재 배열</h2>
+          <div class="body">
+            <table id="arrTable">
+              <thead><tr><th>#</th><th>값</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 우: 로그 패널 -->
+    <aside class="card" aria-labelledby="log-title">
+      <h2 id="log-title">실행 로그</h2>
+      <div class="body">
+        <div id="log" class="log" aria-live="polite"></div>
+        <div class="footer">Tip: <span class="muted">초기화 후 다양한 메서드를 조합해 보세요.</span></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    // ------ 상태 ------
+    let arr = [];
+
+    // ------ 유틸 ------
+    function $(sel){ return document.querySelector(sel); }
+
+    function render() {
+      const tbody = $("#arrTable tbody");
+      tbody.innerHTML = arr.map((v,i)=>`<tr><td>${i}</td><td>${escapeHtml(String(v))}</td></tr>`).join("");
+      $("#lengthChip").textContent = `length: ${arr.length}`;
+    }
+
+    function log(action, before, code, result) {
+      const el = $("#log");
+      const block = document.createElement("div");
+      block.innerHTML = `
+        <div><span class="ok">▶ ${action}</span></div>
+        <div class="muted">before: ${escapeHtml(JSON.stringify(before))}</div>
+        <pre style="white-space:pre-wrap;">${escapeHtml(code)}</pre>
+        <div>after: ${escapeHtml(JSON.stringify(arr))}</div>
+        ${typeof result !== 'undefined' ? `<div>return → <strong>${escapeHtml(String(result))}</strong></div>` : ''}
+        <hr style="border:none; border-top:1px solid #1f2937; margin:10px 0;"/>
+      `;
+      el.prepend(block);
+      render();
+    }
+
+    function escapeHtml(s){
+      return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+    }
+
+    function reset() {
+      const before = [...arr];
+      arr = ["apple", "banana", "cherry"];
+      log("초기화", before, `arr = ["apple", "banana", "cherry"];`);
+    }
+
+    // ------ 선언/참조 ------
+    function declareArray(){
+      const before = [...arr];
+      arr = ["apple", "banana", "cherry"];
+      log("배열 선언", before, `arr = ["apple", "banana", "cherry"];`);
+    }
+
+    function showReference(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      const code = `const first = arr[0];\nconst last = arr[arr.length-1];`;
+      const first = arr[0];
+      const last = arr[arr.length-1];
+      log("인덱스 참조", before, code, `first:${first}, last:${last}`);
+    }
+
+    function updateItem(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      const code = `arr[1] = "berry";`;
+      arr[1] = "berry";
+      log("값 변경 (arr[1])", before, code);
+    }
+
+    // ------ 추가/삭제 ------
+    function doPush(){
+      if(arr.length === 0) reset();
+      const v = $("#pushInput").value || "grape";
+      const before = [...arr];
+      const ret = arr.push(v);
+      log("push", before, `arr.push(${JSON.stringify(v)});`, ret);
+    }
+
+    function doPop(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      const ret = arr.pop();
+      log("pop", before, `arr.pop();`, ret);
+    }
+
+    function doUnshift(){
+      if(arr.length === 0) reset();
+      const v = $("#unshiftInput").value || "avocado";
+      const before = [...arr];
+      const ret = arr.unshift(v);
+      log("unshift", before, `arr.unshift(${JSON.stringify(v)});`, ret);
+    }
+
+    function doShift(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      const ret = arr.shift();
+      log("shift", before, `arr.shift();`, ret);
+    }
+
+    // ------ 부분 수정/복사 ------
+    function doSplice(){
+      if(arr.length === 0) reset();
+      const start = parseInt($("#spStart").value || 1, 10);
+      const del = parseInt($("#spDel").value || 1, 10);
+      const items = $("#spItems").value
+        .split(",")
+        .map(s=>s.trim())
+        .filter(Boolean);
+      const before = [...arr];
+      const ret = arr.splice(start, del, ...items);
+      const code = `arr.splice(${start}, ${del}${items.length?`, ${items.map(v=>JSON.stringify(v)).join(', ')}`:''});`;
+      log("splice", before, code, `[${ret.map(String).join(", ")}]`);
+    }
+
+    function doSlice(){
+      if(arr.length === 0) reset();
+      const s = $("#slStart").value === '' ? 0 : parseInt($("#slStart").value,10);
+      const e = $("#slEnd").value === '' ? arr.length : parseInt($("#slEnd").value,10);
+      const before = [...arr];
+      const ret = arr.slice(s, e);
+      const code = `const part = arr.slice(${s}, ${e});`;
+      log("slice (복사, 원본 유지)", before, code, `[${ret.map(String).join(", ")}]`);
+    }
+
+    // ------ 검색/정렬/결합 ------
+    function doIndexOf(){
+      if(arr.length === 0) reset();
+      const q = $("#searchInput").value || "banana";
+      const before = [...arr];
+      const idx = arr.indexOf(q);
+      log("indexOf", before, `arr.indexOf(${JSON.stringify(q)});`, idx);
+    }
+
+    function doIncludes(){
+      if(arr.length === 0) reset();
+      const q = $("#searchInput").value || "cherry";
+      const before = [...arr];
+      const ret = arr.includes(q);
+      log("includes", before, `arr.includes(${JSON.stringify(q)});`, ret);
+    }
+
+    function doSort(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      arr.sort();
+      log("sort (문자열 기본 오름차순)", before, `arr.sort();`);
+    }
+
+    function doReverse(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      arr.reverse();
+      log("reverse", before, `arr.reverse();`);
+    }
+
+    function doJoin(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      const ret = arr.join(", ");
+      log("join", before, `arr.join(", ");`, ret);
+    }
+
+    // ------ 순회/변환 ------
+    function doForEach(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      let out = [];
+      arr.forEach((v,i)=>out.push(`${i}:${v}`));
+      log("forEach", before, `arr.forEach((v,i)=>{ /* ... */ });`, out.join(" | "));
+    }
+
+    function doMap(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      const mapped = arr.map(x=>String(x).toUpperCase());
+      log("map", before, `const mapped = arr.map(x => x.toUpperCase());`, `[${mapped.join(", ")}]`);
+    }
+
+    function doFilter(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      const filtered = arr.filter(x=>String(x).includes('a'));
+      log("filter", before, `const filtered = arr.filter(x => x.includes('a'));`, `[${filtered.join(", ")}]`);
+    }
+
+    function doReduce(){
+      if(arr.length === 0) reset();
+      const before = [...arr];
+      const sum = arr.reduce((acc,x)=>acc + String(x).length, 0);
+      log("reduce", before, `const sum = arr.reduce((acc,x) => acc + x.length, 0);`, sum);
+    }
+
+    // ------ 초기화 & 이벤트 ------
+    function init(){
+      reset();
+      render();
+      $("#resetBtn").addEventListener('click', reset);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
